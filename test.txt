@@ -1,0 +1,95 @@
+   <div className="LoginHeader">
+                <Image                   
+                    width={'3%'}
+                    src="https://yt3.ggpht.com/ytc/AMLnZu83ghQ28n1SqADR-RbI2BGYTrqqThAtJbfv9jcq=s176-c-k-c0x00ffffff-no-rj"
+                ></Image>
+                <Typography.Title style={{paddingLeft: '10%'}}>Nazimabad Residential Visiting Management System</Typography.Title>
+            </div>
+
+
+import React, { useState } from 'react';
+import { Table, Button, Modal, Form, Input, Spin, Space } from 'antd';
+import axios from 'axios';
+
+const MyComponent = () => {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([
+    { key: '1', name: 'John Brown', age: 32, address: 'New York No. 1 Lake Park' },
+    { key: '2', name: 'Jim Green', age: 42, address: 'London No. 1 Lake Park' },
+  ]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentRow, setCurrentRow] = useState(null);
+  const [form] = Form.useForm();
+
+  // Function to open the modal and load the current row data into the form
+  const showModal = (record) => {
+    setCurrentRow(record);
+    form.setFieldsValue(record);
+    setIsModalVisible(true);
+  };
+
+  // Function to handle the modal submission
+  const handleOk = async () => {
+    try {
+      const values = form.getFieldsValue();
+      setLoading(true);
+
+      // Make the PUT request to update the data on the server
+      await axios.put(`https://api.example.com/data/${currentRow.key}`, values);
+
+      // Update the data in the table
+      setData((prevData) =>
+        prevData.map((item) => (item.key === currentRow.key ? { ...item, ...values } : item))
+      );
+
+      setIsModalVisible(false);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to update data", error);
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  // Define the table columns with an edit button
+  const columns = [
+    { title: 'Name', dataIndex: 'name', key: 'name' },
+    { title: 'Age', dataIndex: 'age', key: 'age' },
+    { title: 'Address', dataIndex: 'address', key: 'address' },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Button type="link" onClick={() => showModal(record)}>
+          Edit
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <Space size={30} direction="vertical">
+      <Spin spinning={loading}>
+        <Table columns={columns} dataSource={data} rowKey="key" />
+      </Spin>
+      <Modal title="Edit Row" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+        <Form form={form} layout="vertical">
+          <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please enter the name' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="age" label="Age" rules={[{ required: true, message: 'Please enter the age' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="address" label="Address" rules={[{ required: true, message: 'Please enter the address' }]}>
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </Space>
+  );
+};
+
+export default MyComponent;
